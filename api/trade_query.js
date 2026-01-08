@@ -86,7 +86,7 @@ export default function handler(req, res) {
     }
 
     const bizObj = { out_trade_no };
-    privateKeyPem=loadPrivateKeyFromString(privatek);
+    const privateKeyPem=loadPrivateKeyFromString(privatek);
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
    
     const params = {
