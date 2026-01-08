@@ -118,7 +118,7 @@ export default function handler(req, res) {
 
     const bizObj = { out_trade_no };
     //const privateKeyPem=loadPrivateKeyFromString(privatek);
-    const filePath2 = path.join(process.cwd(), 'rsa_key', 'private_key.pem');
+    const filePath2 = path.join(process.cwd(), 'rsa-keys', 'private_key.pem');
     const privateKeyPem = loadPrivateKey(filePath2);
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
    
