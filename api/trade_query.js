@@ -1,8 +1,7 @@
 import crypto from 'crypto';
-import forge from 'node-forge';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
-
+import forge from 'node-forge';
 
 
 
@@ -21,25 +20,34 @@ export default function handler(req, res) {
     
     // Lecture du fichier en UTF-8
     
+   
     function loadPrivateKey(filePath) {
-        const rawKey = fs.readFile(filePath, 'utf8');
-        const cleanKey = rawKey.replace(/\r\n|\r/g, '\n').trim(); // Remove \r\n do Windows
-
-        //console.log(cleanKey, 'Chave privada carregada do arquivo.');
-
-        if (!cleanKey.includes('-----BEGIN PRIVATE KEY-----') || 
-            !cleanKey.includes('-----END PRIVATE KEY-----')) {
-            throw new Error('the file does not contain a valid PEM private key');
-        }
-
         try {
-            forge.pki.privateKeyFromPem(cleanKey); // Testa se forge aceita
-            console.log('private key loaded and valid for node-forge.');
-            return cleanKey;
-        } catch (e) {
-            throw new Error('Chave privada inválida para node-forge: ' + e.message);
+            // Utilisation de readFileSync pour obtenir le contenu immédiatement
+            const rawKey = fs.readFileSync(filePath, 'utf8');
+            
+            // Nettoyage des retours à la ligne Windows et espaces
+            const cleanKey = rawKey.replace(/\r\n|\r/g, '\n').trim();
+
+            // Vérification adaptée : On vérifie "PRIVATE KEY" car cela couvre 
+            // à la fois "RSA PRIVATE KEY" et "PRIVATE KEY"
+            if (!cleanKey.includes('PRIVATE KEY')) {
+                throw new Error('Le fichier ne contient pas une clé privée PEM valide');
+            }
+
+            try {
+                // Forge est capable de lire PKCS#1 (RSA PRIVATE KEY) et PKCS#8
+                forge.pki.privateKeyFromPem(cleanKey);
+                console.log('Clé privée chargée et valide pour node-forge.');
+                return cleanKey;
+            } catch (e) {
+                throw new Error('Chave privada inválida para node-forge: ' + e.message);
+            }
+        } catch (err) {
+            throw new Error('Erreur lors de la lecture du fichier : ' + err.message);
         }
     }
+
 
     function loadPrivateKeyFromString(pemString) {
     if (typeof pemString !== 'string' || pemString.trim() === '') {
@@ -110,8 +118,8 @@ export default function handler(req, res) {
 
     const bizObj = { out_trade_no };
     //const privateKeyPem=loadPrivateKeyFromString(privatek);
-    const filePath = path.join(process.cwd(), 'rsa_key', 'private_key.pem');
-    const privateKeyPem = loadPrivateKey(filePath);
+    const filePath2 = path.join(process.cwd(), 'rsa_key', 'private_key.pem');
+    const privateKeyPem = loadPrivateKey(filePath2);
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
    
     const params = {
