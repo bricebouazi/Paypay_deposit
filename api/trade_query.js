@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 import forge from 'node-forge';
+const fs = require('fs');
+
 
 
 
@@ -12,10 +14,28 @@ export default function handler(req, res) {
 
   try {
     
-    const privatek = process.env.TESTKEY?.replace(/\\n/g, '\n');
+    //const privatek = process.env.TESTKEY?.replace(/\\n/g, '\n');
     //const privateKeyPem = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-    
+    function loadPrivateKey(filePath) {
+        const rawKey = fs.readFileSync(filePath, 'utf8');
+        const cleanKey = rawKey.replace(/\r\n|\r/g, '\n').trim(); // Remove \r\n do Windows
+
+        //console.log(cleanKey, 'Chave privada carregada do arquivo.');
+
+        if (!cleanKey.includes('-----BEGIN PRIVATE KEY-----') || 
+            !cleanKey.includes('-----END PRIVATE KEY-----')) {
+            throw new Error('the file does not contain a valid PEM private key');
+        }
+
+        try {
+            forge.pki.privateKeyFromPem(cleanKey); // Testa se forge aceita
+            console.log('private key loaded and valid for node-forge.');
+            return cleanKey;
+        } catch (e) {
+            throw new Error('Chave privada inválida para node-forge: ' + e.message);
+        }
+    }
 
     function loadPrivateKeyFromString(pemString) {
     if (typeof pemString !== 'string' || pemString.trim() === '') {
@@ -52,7 +72,6 @@ export default function handler(req, res) {
     }
     }
 
-
     function encryptBizContent(bizContent, pem) {
       const buffer = Buffer.from(bizContent, 'utf8');
       const chunkSize = 117;
@@ -86,7 +105,8 @@ export default function handler(req, res) {
     }
 
     const bizObj = { out_trade_no };
-    const privateKeyPem=loadPrivateKeyFromString(privatek);
+    //const privateKeyPem=loadPrivateKeyFromString(privatek);
+    const privateKeyPem = loadPrivateKey(path.join(__dirname, 'rsa-keys/private_key.pem'));
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
    
     const params = {
