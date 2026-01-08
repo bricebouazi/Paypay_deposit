@@ -22,7 +22,7 @@ export default function handler(req, res) {
     // Lecture du fichier en UTF-8
     
     function loadPrivateKey(filePath) {
-        const rawKey = fs.readFile(filePath, 'utf8')
+        const rawKey = fs.readFile(filePath, 'utf8');
         const cleanKey = rawKey.replace(/\r\n|\r/g, '\n').trim(); // Remove \r\n do Windows
 
         //console.log(cleanKey, 'Chave privada carregada do arquivo.');
