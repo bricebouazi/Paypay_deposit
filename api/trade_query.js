@@ -57,7 +57,7 @@ if (!privateKeyPem.includes('BEGIN PRIVATE KEY')) {
     const params = {
       charset: 'UTF-8',
       biz_content: encryptedBiz,
-      partner_id: '200001860724', //  200002410911
+      partner_id: process.env.partner_id, //  200002410911
       service: 'trade_query',
       request_no: "REQ" + Date.now(),
       format: 'JSON',
@@ -76,6 +76,7 @@ if (!privateKeyPem.includes('BEGIN PRIVATE KEY')) {
 
     res.status(200).json({
       full_query_string: encodedParams,
+      privateKeyPem:privateKeyPem,
       params
     });
 
