@@ -12,12 +12,46 @@ export default function handler(req, res) {
 
   try {
     
-    const privateKeyPem = process.env.TESTKEY?.replace(/\\n/g, '\n');
+    const privatek = process.env.TESTKEY;
     //const privateKeyPem = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-if (!privateKeyPem.includes('BEGIN PRIVATE KEY')) {
-  throw new Error('Clé privée PEM invalide');
-}
+    
+
+    function loadPrivateKeyFromString(pemString) {
+    if (typeof pemString !== 'string' || pemString.trim() === '') {
+        throw new Error('La clé privée doit être une string PEM non vide');
+    }
+
+    // Normalisation : supporte \n échappés (Vercel) ou vrais retours ligne
+    const cleanKey = pemString
+        .replace(/\\n/g, '\n')   // IMPORTANT pour les env vars
+        .replace(/\r/g, '')
+        .trim();
+
+    const isPKCS1 =
+        cleanKey.includes('-----BEGIN RSA PRIVATE KEY-----') &&
+        cleanKey.includes('-----END RSA PRIVATE KEY-----');
+
+    const isPKCS8 =
+        cleanKey.includes('-----BEGIN PRIVATE KEY-----') &&
+        cleanKey.includes('-----END PRIVATE KEY-----');
+
+    if (!isPKCS1 && !isPKCS8) {
+        throw new Error(
+        'Format PEM invalide (attendu : RSA PRIVATE KEY ou PRIVATE KEY)'
+        );
+    }
+
+    try {
+        // Validation node-forge
+        forge.pki.privateKeyFromPem(cleanKey);
+        console.log('✔ Clé privée valide pour node-forge');
+        return cleanKey;
+    } catch (e) {
+        throw new Error('Clé privée invalide pour node-forge : ' + e.message);
+    }
+    }
+
 
     function encryptBizContent(bizContent, pem) {
       const buffer = Buffer.from(bizContent, 'utf8');
@@ -52,6 +86,7 @@ if (!privateKeyPem.includes('BEGIN PRIVATE KEY')) {
     }
 
     const bizObj = { out_trade_no };
+    privateKeyPem=loadPrivateKeyFromString(privatek);
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
    
     const params = {
