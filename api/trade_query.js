@@ -49,7 +49,7 @@ export default function handler(req, res) {
     const params = {
       charset: 'UTF-8',
       biz_content: encryptedBiz,
-      partner_id: '200001860724',
+      partner_id: '200002410911',
       service: 'trade_query',
       request_no: "REQ" + Date.now(),
       format: 'JSON',
