@@ -9,7 +9,7 @@ export default function handler(req, res) {
   }
 
   try {
-    const privateKeyPem = process.env.TESTKEY; // IMPORTANT
+    const privateKeyPem = process.env.PRIVATE_KEY; // 👈 IMPORTANT
 
     function encryptBizContent(bizContent, pem) {
       const buffer = Buffer.from(bizContent, 'utf8');
@@ -45,11 +45,11 @@ export default function handler(req, res) {
 
     const bizObj = { out_trade_no };
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
-
+   
     const params = {
       charset: 'UTF-8',
       biz_content: encryptedBiz,
-      partner_id: '200001860724',
+      partner_id: '200002410911',
       service: 'trade_query',
       request_no: "REQ" + Date.now(),
       format: 'JSON',
