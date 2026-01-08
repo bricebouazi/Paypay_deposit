@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import forge from 'node-forge';
-const fs = require('fs');
+import fs from 'fs';
 
 
 
