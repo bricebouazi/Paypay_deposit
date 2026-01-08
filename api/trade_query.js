@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import forge from 'node-forge';
-import fs from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
 
 
 
@@ -16,9 +17,12 @@ export default function handler(req, res) {
     
     //const privatek = process.env.TESTKEY?.replace(/\\n/g, '\n');
     //const privateKeyPem = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n');
-
+    
+    
+    // Lecture du fichier en UTF-8
+    
     function loadPrivateKey(filePath) {
-        const rawKey = fs.readFileSync(filePath, 'utf8');
+        const rawKey = fs.readFile(filePath, 'utf8')
         const cleanKey = rawKey.replace(/\r\n|\r/g, '\n').trim(); // Remove \r\n do Windows
 
         //console.log(cleanKey, 'Chave privada carregada do arquivo.');
@@ -106,7 +110,8 @@ export default function handler(req, res) {
 
     const bizObj = { out_trade_no };
     //const privateKeyPem=loadPrivateKeyFromString(privatek);
-    const privateKeyPem = loadPrivateKey(path.join(__dirname, 'rsa-keys/private_key.pem'));
+    const filePath = path.join(process.cwd(), 'rsa_key', 'private_key.pem');
+    const privateKeyPem = loadPrivateKey(filePath);
     const encryptedBiz = encryptBizContent(JSON.stringify(bizObj), privateKeyPem);
    
     const params = {
