@@ -31,9 +31,18 @@ export default function handler(req, res) {
 
             // Vérification adaptée : On vérifie "PRIVATE KEY" car cela couvre 
             // à la fois "RSA PRIVATE KEY" et "PRIVATE KEY"
-            if (!cleanKey.includes('PRIVATE KEY')  || 
-                !cleanKey.includes('END PRIVATE KEY')) {
-                throw new Error('Le fichier ne contient pas une clé privée PEM valide');
+            const isPKCS1 =
+            cleanKey.includes('-----BEGIN RSA PRIVATE KEY-----') &&
+            cleanKey.includes('-----END RSA PRIVATE KEY-----');
+
+            const isPKCS8 =
+                cleanKey.includes('-----BEGIN PRIVATE KEY-----') &&
+                cleanKey.includes('-----END PRIVATE KEY-----');
+
+            if (!isPKCS1 && !isPKCS8) {
+                throw new Error(
+                'Format PEM invalide (attendu : RSA PRIVATE KEY ou PRIVATE KEY)'
+                );
             }
 
             try {
