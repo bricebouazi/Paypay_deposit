@@ -12,7 +12,7 @@ export default function handler(req, res) {
 
   try {
     
-    const privatek = process.env.TESTKEY;
+    const privatek = process.env.TESTKEY?.replace(/\\n/g, '\n');
     //const privateKeyPem = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     
